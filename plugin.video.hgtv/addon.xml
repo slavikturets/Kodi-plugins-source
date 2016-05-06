@@ -21,6 +21,6 @@
     <forum>http://forum.xbmc.org/showthread.php?tid=97018</forum>
     <website>www.hgtv.com</website>
     <email></email>
-    <source>https://github.com/xbmc/repo-plugins/tree/isengard/plugin.video.hgtv</source>
+    <source>https://github.com/learningit/Kodi-plugins-source/tree/master/plugin.video.hgtv</source>
   </extension>
 </addon>

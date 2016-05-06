@@ -21,6 +21,6 @@
     <forum>http://forum.kodi.tv/showthread.php?tid=224195</forum>
     <website>www.foodnetwork.com</website>
     <email></email>
-    <source>https://github.com/xbmc/repo-plugins/tree/isengard/plugin.video.foodnetwork</source>
+    <source>https://github.com/learningit/Kodi-plugins-source/tree/master/plugin.video.foodnetwork</source>
   </extension>
 </addon>
