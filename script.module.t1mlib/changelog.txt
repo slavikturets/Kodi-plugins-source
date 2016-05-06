@@ -1,0 +1,2 @@
+V1.0.15 change default cacheToDisc parm to False
+V1.0.14 another unicode fix
