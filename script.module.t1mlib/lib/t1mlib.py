@@ -146,7 +146,7 @@ class t1mAddon(object):
 
 #internal functions for views, cache and directory management
 
-  def procDir(self, dirFunc, url, contentType='files', viewType='default_view', cache2Disc=False):
+  def procDir(self, dirFunc, url, contentType='files', viewType='default_view', cache2Disc=True):
       ilist = []
       xbmcplugin.setContent(int(sys.argv[1]), contentType)
       xbmcplugin.addSortMethod(int(sys.argv[1]),xbmcplugin.SORT_METHOD_UNSORTED)
