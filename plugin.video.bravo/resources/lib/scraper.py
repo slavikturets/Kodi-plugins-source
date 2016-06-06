@@ -38,13 +38,13 @@ class myAddon(t1mAddon):
 
 
   def getAddonEpisodes(self,url,ilist):
-      self.defaultVidStream['width']  = 1920
+      self.defaultVidStream['width'] = 1920
       self.defaultVidStream['height'] = 1080
       epiHTML = self.getRequest(url)
       (tvshow,  fanart) = re.compile('og:title" content="(.+?)".+?"og:image" content="(.+?)"',re.DOTALL).search(epiHTML).groups()
-      epis = re.compile('class="watch__episode.+?href="(.+?)".+?</ul>',re.DOTALL).findall(epiHTML)
+      epis = re.compile('class="watch__title.+?href="(.+?)".+?</ul>',re.DOTALL).findall(epiHTML)
       for url in epis:
-          burl  = BRAVOBASE % url
+          burl = BRAVOBASE % url
           html = self.getRequest(burl)
           purl = re.compile('data-src="(.+?)"',re.DOTALL).search(html)
           if purl is not None:
@@ -76,24 +76,24 @@ class myAddon(t1mAddon):
 
 
   def getAddonVideo(self,url):
-    gvu1 = 'https://tvebravo-vh.akamaihd.net/i/prod/video/%s_,40,25,18,12,7,4,2,00.mp4.csmil/master.m3u8?b=&__b__=1000&hdnea=st=%s~exp=%s'
-    gvu2 = 'https://tvebravo-vh.akamaihd.net/i/prod/video/%s_,1696,1296,896,696,496,240,306,.mp4.csmil/master.m3u8?b=&__b__=1000&hdnea=st=%s~exp=%s'
-    url = uqp(url)
-    url = url+'?mbr=true&player=Bravo%20VOD%20Player%20%28Phase%203%29&format=Script&height=576&width=1024'
-    html = self.getRequest(url)
-    a = json.loads(html)
-    suburl = a["captions"][0]["src"]
-    url = suburl.split('/caption/',1)[1]
-    url = url.split('.',1)[0]
-    td = (datetime.datetime.utcnow()- datetime.datetime(1970,1,1))
-    unow = int((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6)
-    u   =  gvu1 % (url, str(unow), str(unow+60))
-    req = urllib2.Request(u.encode(UTF8), None, self.defaultHeaders)
-    try:
-       response = urllib2.urlopen(req, timeout=20) # check to see if video file exists
-    except:
-       u   =  gvu2 % (url, str(unow), str(unow+60))
-    liz = xbmcgui.ListItem(path = u)
-    subfile = self.procConvertSubtitles(suburl)
-    if subfile != "" : liz.setSubtitles([subfile])
-    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, liz)
+      gvu1 = 'https://tvebravo-vh.akamaihd.net/i/prod/video/%s_,40,25,18,12,7,4,2,00.mp4.csmil/master.m3u8?b=&__b__=1000&hdnea=st=%s~exp=%s'
+      gvu2 = 'https://tvebravo-vh.akamaihd.net/i/prod/video/%s_,1696,1296,896,696,496,240,306,.mp4.csmil/master.m3u8?b=&__b__=1000&hdnea=st=%s~exp=%s'
+      url = uqp(url)
+      url = url+'?mbr=true&player=Bravo%20VOD%20Player%20%28Phase%203%29&format=Script&height=576&width=1024'
+      html = self.getRequest(url)
+      a = json.loads(html)
+      suburl = a["captions"][0]["src"]
+      url = suburl.split('/caption/',1)[1]
+      url = url.split('.',1)[0]
+      td = (datetime.datetime.utcnow()- datetime.datetime(1970,1,1))
+      unow = int((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6)
+      u = gvu1 % (url, str(unow), str(unow+60))
+      req = urllib2.Request(u.encode(UTF8), None, self.defaultHeaders)
+      try:
+          response = urllib2.urlopen(req, timeout=20) # check to see if video file exists
+      except:
+          u = gvu2 % (url, str(unow), str(unow+60))
+      liz = xbmcgui.ListItem(path = u)
+      subfile = self.procConvertSubtitles(suburl)
+      if subfile != "" : liz.setSubtitles([subfile])
+      xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, liz)

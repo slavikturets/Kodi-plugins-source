@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # KodiAddon (Bravo TV)
 #
-from resources.lib.bravo import myAddon
+from resources.lib.scraper import myAddon
 import re
 import sys
 
