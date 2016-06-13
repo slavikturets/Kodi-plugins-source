@@ -173,6 +173,7 @@ class myAddon(t1mAddon):
 
 
   def getAddonEpisodes(self,url,ilist):
+      url = uqp(url)
       self.defaultVidStream['width']  = 1920
       self.defaultVidStream['height'] = 1080
       xbmcplugin.setContent(int(sys.argv[1]), 'musicvideos')
@@ -200,7 +201,10 @@ class myAddon(t1mAddon):
           if nextUrl is not None:
               nextUrl = nextUrl.get('next')
       if type(a) is list:
-          akeys = ['name', 'stream', 'thumbnailUrl']
+          if a[0].get('stream') is not None:
+              akeys = ['name', 'stream', 'thumbnailUrl']
+          else:
+              akeys = ['title', 'isrc', 'thumbnailUrl']
       elif a.get('videos') is not None:
           a = a['videos']
           akeys = ['title', 'isrc', 'thumbnailUrl']
@@ -240,6 +244,9 @@ class myAddon(t1mAddon):
           else:
               contextMenu = [('Add to Playlist','XBMC.RunPlugin(%s?mode=DF&url=AP%s)' % (sys.argv[0],url)),
                              ('Add To Library','XBMC.RunPlugin(%s?mode=DF&url=AL%s)' % (sys.argv[0],url))]
+          if akeys[1] == 'isrc':
+              curl = VEVOAPI + ('/video/%s/related?&page=1&size=50&token=' % (url))
+              contextMenu.append(('Get Related Videos','XBMC.Container.Update(%s?mode=GE&url=%s)' % (sys.argv[0],qp(curl))))
           ilist = self.addMenuItem(name,'GV', ilist, url, thumb, thumb, infoList, isFolder=False, cm=contextMenu)
       if nextUrl is not None:
           name = '[COLOR blue]Next Page[/COLOR]'
