@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# KodiAddon for VEVO
+# KodiAddon for myVEVO
 #
 from t1mlib import t1mAddon
 import json
@@ -15,6 +15,7 @@ import HTMLParser
 import re
 import json
 import sys
+import os
 
 h = HTMLParser.HTMLParser()
 uqp = urllib.unquote_plus
@@ -218,17 +219,20 @@ class myAddon(t1mAddon):
           infoList['Title'] = name
           infoList['Plot'] = b.get('description')
           artists = b.get('artists')
-          if artists is not None:
-              infoList['Artist'] = [] 
+          infoList['Artist'] = [] 
+          if artists is not None and artists != []:
               for artist in artists:
                   infoList['Artist'].append(artist['name'] + ' ')
+          else:
+              infoList['Artist'].append(xbmc.getInfoLabel('ListItem.Artist'))
           infoList['Year'] = b.get('year')
           infoList['duration'] = b.get('duration')
           infoList['mediatype']= 'musicvideo'
           if playList is not None:
               contextMenu = [('Remove From Playlist','XBMC.Container.Update(%s?mode=DF&url=DP%spid%s)' % (sys.argv[0],url, playList))]
           else:
-              contextMenu = [('Add to Playlist','XBMC.RunPlugin(%s?mode=DF&url=AP%s)' % (sys.argv[0],url))]
+              contextMenu = [('Add to Playlist','XBMC.RunPlugin(%s?mode=DF&url=AP%s)' % (sys.argv[0],url)),
+                             ('Add To Library','XBMC.RunPlugin(%s?mode=DF&url=AL%s)' % (sys.argv[0],url))]
           ilist = self.addMenuItem(name,'GV', ilist, url, thumb, thumb, infoList, isFolder=False, cm=contextMenu)
       if nextUrl is not None:
           name = '[COLOR blue]Next Page[/COLOR]'
@@ -246,7 +250,14 @@ class myAddon(t1mAddon):
           thumb = b.get("thumbnail", self.addonIcon)
           fanart = b.get("fanart", self.addonFanart)
           url = 'GF'+name.replace(' ','+')
-          ilist = self.addMenuItem(name, 'GE', ilist, url, thumb, fanart, None, isFolder=True)
+          infoList = {}
+          infoList['Title'] = name
+          infoList['Plot'] = b.get('description')
+          infoList['Artist'] = [name]
+          infoList['Year'] = b.get('year')
+          infoList['duration'] = b.get('duration')
+          infoList['mediatype']= 'musicvideo'
+          ilist = self.addMenuItem(name, 'GE', ilist, url, thumb, fanart, infoList, isFolder=True)
       return(ilist)
 
 
@@ -269,6 +280,22 @@ class myAddon(t1mAddon):
           choice = dialog.select('Choose a playlist', nlist)
           pid = ilist[choice]
           self.updateList(pid = pid, token = token, cmd = 'ADDITEM', isrc = url)
+      elif func == 'AL':
+          artist = xbmc.getInfoLabel('ListItem.Artist').split('/',1)[0]
+          artist = artist.replace(':','').replace('-','').replace("'",'').replace('"','').replace('.','')
+          title = xbmc.getInfoLabel('ListItem.Title').split('(',1)[0]
+          title = title.replace(':','').replace('-','').replace("'",'').replace('"','').replace('/','').replace('.','')
+          name = artist.strip() + ' - ' + title.strip()
+          profile = self.addon.getAddonInfo('profile').decode(UTF8)
+          videosDir  = xbmc.translatePath(os.path.join(profile,'Videos'))
+          videoDir  = xbmc.translatePath(os.path.join(videosDir, name))
+          if not os.path.isdir(videoDir):
+             os.makedirs(videoDir)
+          strmFile = xbmc.translatePath(os.path.join(videoDir, name+'.strm'))
+          with open(strmFile, 'w') as outfile:
+              outfile.write('%s?mode=GV&url=%s' %(sys.argv[0], url))
+          json_cmd = '{"jsonrpc":"2.0","method":"VideoLibrary.Scan", "params": {"directory":"%s/"},"id":1}' % videoDir.replace('\\','/')
+          jsonRespond = xbmc.executeJSONRPC(json_cmd)
 
 
   def getAddonVideo(self,url):
@@ -279,4 +306,16 @@ class myAddon(t1mAddon):
               if b["version"] == 2:
                   url = b['url']
                   break
-      xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xbmcgui.ListItem(path = url))
+      liz = xbmcgui.ListItem(path = url)
+      infoList ={}
+      infoList['Artist'] = []
+      infoList['Artist'].append(xbmc.getInfoLabel('ListItem.Artist'))
+      infoList['Title'] = xbmc.getInfoLabel('ListItem.Title')
+      infoList['Year'] = xbmc.getInfoLabel('ListItem.Year')
+      infoList['Plot'] = xbmc.getInfoLabel('ListItem.Plot')
+      infoList['Studio'] = xbmc.getInfoLabel('ListItem.Studio')
+      infoList['Album'] = xbmc.getInfoLabel('ListItem.Album')
+      infoList['Duration'] = xbmc.getInfoLabel('ListItem.Duration')
+      infoList['mediatype']= 'musicvideo'
+      liz.setInfo('video', infoList)
+      xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, liz)

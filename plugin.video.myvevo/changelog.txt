@@ -1,1 +1,2 @@
+Version 3.0.2 Added initial version of Add to Library
 Version 3.0.1 Isengard version
