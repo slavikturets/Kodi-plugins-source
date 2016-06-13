@@ -224,12 +224,19 @@ class myAddon(t1mAddon):
               for artist in artists:
                   infoList['Artist'].append(artist['name'] + ' ')
           else:
-              infoList['Artist'].append(xbmc.getInfoLabel('ListItem.Artist'))
+              if name.endswith('"') and akeys[2] == 'image':
+                  artist, name = name.split('"',1)
+                  infoList['Artist'].append(artist.strip())
+                  name = name.strip('"').strip()
+                  infoList['Title'] = name             
+              else:
+                  infoList['Artist'].append(xbmc.getInfoLabel('ListItem.Artist'))
           infoList['Year'] = b.get('year')
           infoList['duration'] = b.get('duration')
           infoList['mediatype']= 'musicvideo'
           if playList is not None:
-              contextMenu = [('Remove From Playlist','XBMC.Container.Update(%s?mode=DF&url=DP%spid%s)' % (sys.argv[0],url, playList))]
+              contextMenu = [('Remove From Playlist','XBMC.Container.Update(%s?mode=DF&url=DP%spid%s)' % (sys.argv[0],url, playList)),
+                             ('Add To Library','XBMC.RunPlugin(%s?mode=DF&url=AL%s)' % (sys.argv[0],url))]
           else:
               contextMenu = [('Add to Playlist','XBMC.RunPlugin(%s?mode=DF&url=AP%s)' % (sys.argv[0],url)),
                              ('Add To Library','XBMC.RunPlugin(%s?mode=DF&url=AL%s)' % (sys.argv[0],url))]
@@ -282,9 +289,11 @@ class myAddon(t1mAddon):
           self.updateList(pid = pid, token = token, cmd = 'ADDITEM', isrc = url)
       elif func == 'AL':
           artist = xbmc.getInfoLabel('ListItem.Artist').split('/',1)[0]
-          artist = artist.replace(':','').replace('-','').replace("'",'').replace('"','').replace('.','')
+#          artist = artist.replace(':','').replace('-','').replace("'",'').replace('"','').replace('.','')
+          artist = artist.replace(':','').replace('-','').replace('?','%3F')
           title = xbmc.getInfoLabel('ListItem.Title').split('(',1)[0]
-          title = title.replace(':','').replace('-','').replace("'",'').replace('"','').replace('/','').replace('.','')
+#          title = title.replace(':','').replace('-','').replace("'",'').replace('"','').replace('/','').replace('.','')
+          title = title.replace(':','').replace('-','').replace('?','%3F')
           name = artist.strip() + ' - ' + title.strip()
           profile = self.addon.getAddonInfo('profile').decode(UTF8)
           videosDir  = xbmc.translatePath(os.path.join(profile,'Videos'))
@@ -306,7 +315,8 @@ class myAddon(t1mAddon):
               if b["version"] == 2:
                   url = b['url']
                   break
-      liz = xbmcgui.ListItem(path = url)
+      thumb = xbmc.getInfoLabel('ListItem.Art(thumb)')
+      liz = xbmcgui.ListItem(path = url, thumbnailImage = thumb)
       infoList ={}
       infoList['Artist'] = []
       infoList['Artist'].append(xbmc.getInfoLabel('ListItem.Artist'))
